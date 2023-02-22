@@ -2,7 +2,7 @@ from os import listdir as os_listdir
 from os.path import isfile as os_isfile, isdir as os_isdir, join as os_join
 import subprocess
 
-def recursive_files(mydir=None):
+def recursive_files(mydir='./src'):
     if mydir is None:
         mydir = '.'
     current = [f for f in os_listdir(mydir) if os_isfile(os_join(mydir, f))]
@@ -21,7 +21,7 @@ def safefiles():
     return [f"\"{f}\"" if ' ' in f else f for f in files()]
 
 def command():
-    return f"emcc -o main.js -s WASM=1 -O3 -std=c++17 -lembind {' '.join(safefiles())}"
+    return f"emcc -o dist/main.js -s WASM=1 -O3 -std=c++17 -lembind {' '.join(safefiles())}"
 
 def run_command(cmd):
     try:
