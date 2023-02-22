@@ -12,3 +12,6 @@ Requires python 3.
 If you got VSCode, install Live Server and launch it on ``./dist/index.html``.
 
 If you don't want to run it yourself, a version is available on [My Website](https://ktnuity.com/r3d/).
+
+# Credits
+Partially borrowing code from [Notch's LD21 entry](https://github.com/skeeto/Prelude-of-the-Chambered).
