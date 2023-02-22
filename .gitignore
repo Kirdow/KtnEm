@@ -1,0 +1,8 @@
+# dirs
+.vscode/
+
+# files
+main.wasm
+main.js
+Makefile
+build
