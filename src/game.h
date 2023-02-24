@@ -4,6 +4,7 @@
 #include "r3d.h"
 #include "frames.h"
 #include "epos.h"
+#include "resolution.h"
 
 namespace KtnEm
 {
@@ -23,6 +24,8 @@ namespace KtnEm
         Game(GameSpec spec = GameSpec());
         ~Game();
 
+        Scope<Resolution>& GetResolution() { return m_Res; }
+
         void Run();
         void Next();
 
@@ -37,5 +40,6 @@ namespace KtnEm
         Ref<R3D> m_R3D;
         Framerater m_Frames;
         KtnEm::EPos m_Player;
+        Scope<Resolution> m_Res;
     };
 }

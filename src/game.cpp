@@ -3,8 +3,10 @@
 #include "input.h"
 #include "level.h"
 #include "vec.h"
+#include <array>
 
 #include <emscripten.h>
+#include <emscripten/bind.h>
 
 extern uint32_t WndScale;
 
@@ -34,6 +36,8 @@ namespace KtnEm
     {
         m_Wnd = CreateRef<Wnd>(spec.Width, spec.Height);
         m_R3D = CreateRef<R3D>(m_Wnd);
+
+        m_Res = CreateScope<Resolution>(m_Wnd->GetCanvasHeight(), WndScale);
         
         m_Player.x = 8;
         m_Player.y = 8;
@@ -181,4 +185,47 @@ namespace KtnEm
             if (CanMoveTo(m_Player.x, m_Player.y + mY)) m_Player.y += mY; 
         }
     }
+}
+
+KtnEm::Game* GetGame();
+
+static KtnEm::Scope<KtnEm::Resolution>& GetRes()
+{
+    return GetGame()->GetResolution();
+}
+
+uint32_t SetScale(uint32_t scale)
+{
+    auto& res = GetRes();
+    res->SetScale(scale);
+    return res->GetScale();
+}
+
+uint32_t GetScale()
+{
+    return GetRes()->GetScale();
+}
+
+void SetHeight(uint32_t height)
+{
+    auto scale = GetScale();
+    if (height < scale * 4) height = scale * 4;
+    GetRes()->SetHeight(height);
+}
+
+std::array<uint32_t, 2> GetSize()
+{
+    return GetRes()->GetSize();
+}
+
+EMSCRIPTEN_BINDINGS(EMStuff)
+{
+    emscripten::function("SetScale", &SetScale);
+    emscripten::function("GetScale", &GetScale);
+    emscripten::function("SetHeight", &SetHeight);
+    emscripten::function("GetSize", &GetSize);
+
+    emscripten::value_array<std::array<uint32_t, 2>>("array_int_2")
+        .element(emscripten::index<0>())
+        .element(emscripten::index<1>());
 }

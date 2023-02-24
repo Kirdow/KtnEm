@@ -1,6 +1,9 @@
 #include "base.h"
 #include "input.h"
 
+#include <emscripten.h>
+#include <emscripten/bind.h>
+
 namespace KtnEm
 {
     struct KeyState
@@ -47,4 +50,19 @@ namespace KtnEm
 
         return state;
     }
+
+    class Game;
+}
+KtnEm::Game* GetGame();
+
+static bool OnKey(uint32_t keyCode, bool state)
+{
+    if (!GetGame()) return false;
+
+    return KtnEm::Input::SubmitKey(keyCode, state);
+}
+
+EMSCRIPTEN_BINDINGS(EMStuff)
+{
+    emscripten::function("OnKey", &OnKey);
 }

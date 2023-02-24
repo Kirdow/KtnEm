@@ -3,8 +3,8 @@ Module.onRuntimeInitialized = function() {
 
     (window || globalThis).GetScale = () => Module.GetScale();
     (window || globalThis).SetScale = (scale) => Module.SetScale(scale);
-    (window || globalThis).SetSize = (height) => {
-        Module.SetSize(0, height);
+    (window || globalThis).SetHeight = (height) => {
+        Module.SetHeight(height);
     };
     (window || globalThis).GetSize = () => Module.GetSize();
 }
