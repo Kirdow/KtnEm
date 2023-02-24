@@ -12,6 +12,8 @@ namespace KtnEm
         ~R3D();
 
         void DrawFrame(EPos& pos);
+
+        void Resize();
     private:
         void ClearBuffers();
 

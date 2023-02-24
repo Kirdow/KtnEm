@@ -113,6 +113,15 @@ namespace KtnEm
         delete[] sky;
     }
 
+    void R3D::Resize()
+    {
+        delete[] m_ZBuffer;
+        delete[] m_ZBufferWall;
+
+        m_ZBuffer = new double[m_Wnd->GetWidthInt() * m_Wnd->GetHeightInt()];
+        m_ZBufferWall = new double[m_Wnd->GetWidthInt()];
+    }
+
     R3D::~R3D()
     {
         delete[] m_ZBuffer;

@@ -1,0 +1,10 @@
+canvas ~ div {
+    position: fixed;
+    top: 20px;
+    left: calc(50% - 100px);
+    max-width: 200px;
+}
+
+body {
+    overflow-y: hidden;
+}

@@ -6,6 +6,8 @@
 
 #include <emscripten.h>
 
+extern uint32_t WndScale;
+
 namespace KtnEm
 {
     static bool CanMoveTo2(float x, float y)
@@ -43,7 +45,7 @@ namespace KtnEm
             }, fps);
         });
 
-        m_Wnd->SetFlush([](uint32_t w, uint32_t h, const void* data)
+        m_Wnd->SetCallback([](uint32_t w, uint32_t h, const void* data)
         {
             EM_ASM_({
                 const data = Module.HEAPU8.slice($0, $0 + $1 * $2 * 4);
@@ -52,6 +54,15 @@ namespace KtnEm
                 imageData.data.set(data);
                 context.putImageData(imageData, 0, 0);
             }, data, w, h);
+        },[](uint32_t w, uint32_t h)
+        {
+            EM_ASM_({
+                const canvas = Module['canvas'];
+                canvas.width = $0;
+                canvas.height = $1;
+                canvas.style.margin = `100px calc(50% - ${Math.floor($0 / 2)}px)`;
+                Module['context'] = canvas.getContext('2d', { willReadFrequently: true });
+            }, w, h);
         });
 
         EM_ASM_({
@@ -62,6 +73,7 @@ namespace KtnEm
             canvas.style.margin = `100px calc(50% - ${Math.floor($0 / 2)}px)`;
             document.body.style.background = '#181A1B';
             document.body.style.color = '#fff';
+            Module['canvas'] = canvas;
             Module['context'] = canvas.getContext('2d', { willReadFrequently: true });
 
             const fps = document.createElement('div');
@@ -96,6 +108,14 @@ namespace KtnEm
     Game::~Game()
     {
 
+    }
+
+    void Game::Resize(uint32_t width, uint32_t height, int32_t scale)
+    {
+        if (scale > 0 && scale <= 64)
+            WndScale = scale;
+        m_Wnd->Resize(width, height);
+        m_R3D->Resize();
     }
 
     void Game::Run()

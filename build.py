@@ -21,7 +21,7 @@ def safefiles():
     return [f"\"{f}\"" if ' ' in f else f for f in files()]
 
 def command():
-    return f"emcc -o dist/main.js -s WASM=1 -O3 -std=c++17 -lembind {' '.join(safefiles())}"
+    return f"emcc -o dist/main.js -sALLOW_MEMORY_GROWTH -s WASM=1 -O3 -std=c++17 -lembind {' '.join(safefiles())}"
 
 def run_command(cmd):
     try:

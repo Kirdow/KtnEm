@@ -25,6 +25,8 @@ namespace KtnEm
 
         void Run();
         void Next();
+
+        void Resize(uint32_t width, uint32_t height, int32_t scale = -1);
     private:
         void Tick(float delta);
         void Frame();

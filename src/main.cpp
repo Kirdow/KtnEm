@@ -48,7 +48,6 @@ static uint32_t FixScale(uint32_t scale)
     return scale;
 }
 
-extern uint32_t WndScale;
 static uint32_t* s_NewScale = nullptr;
 static uint32_t s_Height = 0;
 
@@ -56,7 +55,6 @@ uint32_t SetScale(uint32_t scale);
 void Start(uint32_t height)
 {
     if (s_Game) return;
-    WndScale = FixScale(height / 120);
     s_Height = height;
 
     s_Game = new KtnEm::Game(KtnEm::GameSpec(height * 4 / 3, height));
@@ -71,22 +69,21 @@ void Start(uint32_t height)
 
 void Run()
 {
+    if (!s_Game) return;
+
     if (s_NewScale)
     {
-        WndScale = *s_NewScale;
+        uint32_t scale = *s_NewScale;
         delete s_NewScale;
         s_NewScale = nullptr;
 
-        EM_ASM_({
-            document.body.querySelectorAll("div").forEach(e => document.body.removeChild(e));
-            document.body.querySelectorAll("canvas").forEach(e => document.body.removeChild(e));
-        });
+        //EM_ASM_({
+        //    document.body.querySelectorAll("div").forEach(e => document.body.removeChild(e));
+        //    document.body.querySelectorAll("canvas").forEach(e => document.body.removeChild(e));
+        //});
 
-        delete s_Game;
-        s_Game = new KtnEm::Game(KtnEm::GameSpec(s_Height * 4 / 3, s_Height));
+        s_Game->Resize(s_Height * 4 / 3, s_Height, scale);
     }    
-
-    if (!s_Game) return;
 
     s_Game->Run();
 }
@@ -94,15 +91,27 @@ void Run()
 
 uint32_t SetScale(uint32_t scale)
 {
-    scale = FixScale(scale);
-
     s_NewScale = new uint32_t(scale);
     return scale;
 }
 
+extern uint32_t WndScale;
 uint32_t GetScale()
 {
     return WndScale;
+}
+
+void SetSize(uint32_t width, uint32_t height)
+{
+    auto scale = GetScale();
+    if (height < scale * 4) height = scale * 4;
+    s_Height = height;
+    SetScale(scale);
+}
+
+std::array<uint32_t, 2> GetSize()
+{
+    return { s_Height * 4 / 3, s_Height };
 }
 
 EMSCRIPTEN_BINDINGS(EMStuff)
@@ -112,6 +121,12 @@ EMSCRIPTEN_BINDINGS(EMStuff)
     emscripten::function("Run", &Run);
     emscripten::function("SetScale", &SetScale);
     emscripten::function("GetScale", &GetScale);
+    emscripten::function("SetSize", &SetSize);
+    emscripten::function("GetSize", &GetSize);
+
+    emscripten::value_array<std::array<uint32_t, 2>>("array_int_2")
+        .element(emscripten::index<0>())
+        .element(emscripten::index<1>());
 
 //    emscripten::class_<KtnEm::EPos>("EPos")
 //        .property("x", &KtnEm::EPos::x)
