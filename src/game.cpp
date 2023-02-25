@@ -2,8 +2,8 @@
 #include "game.h"
 #include "input.h"
 #include "level.h"
-#include "vec.h"
 #include <array>
+#include <glm/glm.hpp>
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -12,35 +12,18 @@ extern uint32_t WndScale;
 
 namespace KtnEm
 {
-    static bool CanMoveTo2(float x, float y)
-    {
-        return !KtnEm::Level::IsCollision((int32_t)floorf(x + 0.5f), (int32_t)floorf(y + 0.5f));
-    }
-
-    static bool CanMoveTo(float x, float y)
-    {
-        float rad = 0.25f;
-
-        for (int i = -1; i <= 1; i++)
-        {
-            for (int j = -1; j <= 1; j++)
-            {
-                if (!CanMoveTo2(x + i * rad, y + j * rad)) return false;
-            }
-        }
-
-        return true;
-    }
-
     Game::Game(GameSpec spec)
     {
         m_Wnd = CreateRef<Wnd>(spec.Width, spec.Height);
         m_R3D = CreateRef<R3D>(m_Wnd);
 
         m_Res = CreateScope<Resolution>(m_Wnd->GetCanvasHeight(), WndScale);
-        
-        m_Player.x = 8;
-        m_Player.y = 8;
+
+        m_Player = CreateRef<Player>();
+
+        auto& pos = m_Player->GetPosition();
+        pos.x = 8;
+        pos.y = 8;
 
         m_Frames.AddCallback([](uint32_t fps)
         {
@@ -106,7 +89,7 @@ namespace KtnEm
             window.addEventListener('keyup', e => Module.OnKey(e.keyCode, false), true);
         }, m_Wnd->GetCanvasWidth(), m_Wnd->GetCanvasHeight());
 
-        while (!CanMoveTo(m_Player.x, m_Player.y)) m_Player.x++;
+        m_Player->ValidateSpawn();
     }
 
     Game::~Game()
@@ -144,46 +127,13 @@ namespace KtnEm
 
     void Game::Tick(float delta)
     {
-        TickInput(delta);
+        m_Player->Tick(delta);
     }
 
     void Game::Frame()
     {
         m_R3D->DrawFrame(m_Player);
         m_Wnd->Flush();
-    }
-
-    void Game::TickInput(float delta)
-    {
-        // Rotation
-        float turnY = 0.0f;
-        if (Input::KeyTurnLeft()) --turnY;
-        if (Input::KeyTurnRight()) ++turnY;
-        m_Player.rot += 3.141592f * turnY * delta;
-
-        // Calculate cosine / sine
-        m_Player.Calculate();
-
-        // Position
-        Math::Vec2f move;
-        if (Input::KeyForward()) ++move.y;
-        if (Input::KeyBackward()) --move.y;
-        if (Input::KeyLeft()) --move.x;
-        if (Input::KeyRight()) ++move.x;
-
-        move = move.normal();
-
-        move.x *= delta * 2.5f;
-        move.y *= delta * 2.5f;
-
-        if (move.x != 0.0f || move.y != 0.0f)
-        {
-            float mX = m_Player.cosine * move.x + m_Player.sine * move.y;
-            float mY = m_Player.cosine * move.y - m_Player.sine * move.x;
-
-            if (CanMoveTo(m_Player.x + mX, m_Player.y)) m_Player.x += mX;
-            if (CanMoveTo(m_Player.x, m_Player.y + mY)) m_Player.y += mY; 
-        }
     }
 }
 

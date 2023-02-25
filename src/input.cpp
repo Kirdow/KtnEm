@@ -16,6 +16,9 @@ namespace KtnEm
         bool right = false;
         bool turnLeft = false;
         bool turnRight = false;
+
+        float moveSpeed = 1.0f;
+        float turnSpeed = 3.141592f;
     };
 
     static KeyState s_States;
@@ -26,6 +29,29 @@ namespace KtnEm
     bool Input::KeyRight() { return s_States.right; }
     bool Input::KeyTurnLeft() { return s_States.turnLeft; }
     bool Input::KeyTurnRight() { return s_States.turnRight; }
+
+    void Input::SetMoveSpeed(float speed) { s_States.moveSpeed = speed; }
+    void Input::SetTurnSpeed(float speed) { s_States.turnSpeed = speed; }
+
+    float Input::GetMoveSpeed() { return s_States.moveSpeed; }
+    float Input::GetTurnSpeed() { return s_States.turnSpeed; }
+
+    InputAxis Input::GetInputAxis(float delta)
+    {
+        // Rotation
+        float turnY = 0.0f;
+        if (Input::KeyTurnLeft()) --turnY;
+        if (Input::KeyTurnRight()) ++turnY;
+
+        // Position
+        glm::vec2 move(0.0f, 0.0f);
+        if (Input::KeyForward()) ++move.y;
+        if (Input::KeyBackward()) --move.y;
+        if (Input::KeyLeft()) --move.x;
+        if (Input::KeyRight()) ++move.x;
+
+        return { glm::normalize(move) * delta * s_States.moveSpeed, turnY * delta * s_States.turnSpeed };
+    }
 
     bool Input::SubmitKey(uint32_t keyCode, bool state)
     {

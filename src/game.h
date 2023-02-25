@@ -3,7 +3,6 @@
 #include "wnd.h"
 #include "r3d.h"
 #include "frames.h"
-#include "epos.h"
 #include "resolution.h"
 
 namespace KtnEm
@@ -18,6 +17,7 @@ namespace KtnEm
             : Width(width), Height(height), Title(title) {}
     };
 
+    class Player;
     class Game
     {
     public:
@@ -30,16 +30,16 @@ namespace KtnEm
         void Next();
 
         void Resize(uint32_t width, uint32_t height, int32_t scale = -1);
+
+        const Ref<Player>& GetPlayer() const { return m_Player; }
     private:
         void Tick(float delta);
         void Frame();
-
-        void TickInput(float delta);
     private:
         Ref<Wnd> m_Wnd;
         Ref<R3D> m_R3D;
         Framerater m_Frames;
-        KtnEm::EPos m_Player;
+        Ref<Player> m_Player;
         Scope<Resolution> m_Res;
     };
 }

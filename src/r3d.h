@@ -1,7 +1,7 @@
 #pragma once
 
 #include "wnd.h"
-#include "epos.h"
+#include "player.h"
 
 namespace KtnEm
 {
@@ -11,17 +11,17 @@ namespace KtnEm
         R3D(const Ref<Wnd>& wnd);
         ~R3D();
 
-        void DrawFrame(EPos& pos);
+        void DrawFrame(const Ref<Player>& player);
 
         void Resize();
     private:
         void ClearBuffers();
 
-        void DrawFloors(EPos& pos);
-        void DrawWalls(EPos& pos);
-        void DrawFog(EPos& pos);
+        void DrawFloors(const Ref<Player>& player);
+        void DrawWalls(const Ref<Player>& player);
+        void DrawFog(const Ref<Player>& player);
 
-        void DrawWall(EPos& pos, double xLeft, double xRight, double zDistanceLeft, double zDistanceRight, uint32_t tidx);
+        void DrawWall(const Ref<Player>& player, double xLeft, double xRight, double zDistanceLeft, double zDistanceRight, uint32_t tidx);
 
         double& GetZBuffer(uint32_t x, uint32_t y)
         {

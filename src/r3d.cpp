@@ -129,27 +129,29 @@ namespace KtnEm
         delete[] m_Sky;
     }
 
-    void R3D::DrawFrame(EPos& pos)
+    void R3D::DrawFrame(const Ref<Player>& player)
     {
         ClearBuffers();
 
-        pos.Calculate();
+        auto& pos = player->GetPosition();
 
-        xCam = pos.x - pos.sine * 0.3;
-        yCam = pos.y - pos.cosine * 0.3;
+        xCam = pos.x - player->GetSine() * 0.3;
+        yCam = pos.y - player->GetCosine() * 0.3;
 
-        DrawWalls(pos);
-        DrawFloors(pos);
-        DrawFog(pos);
+        DrawWalls(player);
+        DrawFloors(player);
+        DrawFog(player);
     }
 
-    void R3D::DrawFloors(EPos& pos)
+    void R3D::DrawFloors(const Ref<Player>& player)
     {
         uint32_t h = m_Wnd->GetHeightInt();
         uint32_t w = m_Wnd->GetWidthInt();
         double h2 = h / 2.0;
         double w2 = w / 2.0;
         double h1 = 1.0 / h;
+        auto cosine = player->GetCosine();
+        auto sine = player->GetSine();
 
         for (int32_t y = 0; y < h; y++)
         {
@@ -169,8 +171,8 @@ namespace KtnEm
                 if (GetZBuffer(x, y) <= z) continue;
                 double depth = (x - w2) * h1 * z;
 
-                double xx = depth * pos.cosine + z * pos.sine + (xCam + 0.5) * 4;
-                double yy = z * pos.cosine - depth * pos.sine + (yCam + 0.5) * 4;
+                double xx = depth * cosine + z * sine + (xCam + 0.5) * 4;
+                double yy = z * cosine - depth * sine + (yCam + 0.5) * 4;
 
                 int32_t xPix = (int32_t)(floorf(xx * 2));
                 int32_t yPix = (int32_t)(floorf(yy * 2));
@@ -194,7 +196,7 @@ namespace KtnEm
         0x1C3151
     };
 
-    void R3D::DrawWalls(EPos& pos)
+    void R3D::DrawWalls(const Ref<Player>& player)
     {
         int32_t tx = (int32_t)floorf(xCam);
         int32_t ty = (int32_t)floorf(yCam);
@@ -213,45 +215,48 @@ namespace KtnEm
                 {
                     if (!east)
                     {
-                        DrawWall(pos, x + 1, x + 1, y, y + 1, self - 1);
+                        DrawWall(player, x + 1, x + 1, y, y + 1, self - 1);
                     }
                     if (!south)
                     {
-                        DrawWall(pos, x + 1, x, y + 1, y + 1, self - 1);
+                        DrawWall(player, x + 1, x, y + 1, y + 1, self - 1);
                     }
                 }
                 else
                 {
                     if (east)
                     {
-                        DrawWall(pos, x + 1, x + 1, y + 1, y, east - 1);
+                        DrawWall(player, x + 1, x + 1, y + 1, y, east - 1);
                     }
                     if (south)
                     {
-                        DrawWall(pos, x, x + 1, y + 1, y + 1, south - 1);
+                        DrawWall(player, x, x + 1, y + 1, y + 1, south - 1);
                     }
                 }
             }
         }
     }
 
-    void R3D::DrawWall(EPos& pos, double xLeft, double xRight, double zDistanceLeft, double zDistanceRight, uint32_t tidx)
+    void R3D::DrawWall(const Ref<Player>& player, double xLeft, double xRight, double zDistanceLeft, double zDistanceRight, uint32_t tidx)
     {
+        auto cosine = player->GetCosine();
+        auto sine = player->GetSine();
+
         double xcLeft = ((xLeft - 0.5) - xCam) * 2.0;
         double zcLeft = ((zDistanceLeft - 0.5) - yCam) * 2.0;
 
-        double rotLeftSideX = xcLeft * pos.cosine - zcLeft * pos.sine;
+        double rotLeftSideX = xcLeft * cosine - zcLeft * sine;
         double yCornerTL = ((-0.5)) * 2.0;
         double yCornerBL = ((0.5)) * 2.0;
-        double rotLeftSideZ = zcLeft * pos.cosine + xcLeft * pos.sine;
+        double rotLeftSideZ = zcLeft * cosine + xcLeft * sine;
 
         double xcRight = ((xRight - 0.5) - xCam) * 2.0;
         double zcRight = ((zDistanceRight - 0.5) - yCam) * 2.0;
 
-        double rotRightSideX = xcRight * pos.cosine - zcRight * pos.sine;
+        double rotRightSideX = xcRight * cosine - zcRight * sine;
         double yCornerTR = ((-0.5)) * 2.0;
         double yCornerBR = ((0.5)) * 2.0;
-        double rotRightSideZ = zcRight * pos.cosine + xcRight * pos.sine;
+        double rotRightSideZ = zcRight * cosine + xcRight * sine;
 
         double tex30 = 0;
         double tex40 = 8;
@@ -331,9 +336,10 @@ namespace KtnEm
         }
     }
 
-    void R3D::DrawFog(EPos& pos)
+    void R3D::DrawFog(const Ref<Player>& player)
     {
         auto s = m_Wnd->GetWidthInt() * m_Wnd->GetHeightInt();
+        auto rot = player->GetRotation();
 
         const double DEL = 24.0;
         const double SCALE = 6.0;
@@ -344,7 +350,7 @@ namespace KtnEm
             double z = m_ZBuffer[i];
             if (z < 0)
             {
-                int32_t xx = ((int) floorf((i % w) / 8 + pos.rot * 64 / (3.141592f * 2.0f) * 8)) & 63;
+                int32_t xx = ((int) floorf((i % w) / 8 + rot * 64 / (3.141592f * 2.0f) * 8)) & 63;
                 int32_t yy = i / w;
                 double grad = 0.2 - (double)yy / (double)h * 0.2;
                 if (grad < 0.0) grad = 0.0;
