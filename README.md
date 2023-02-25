@@ -1,4 +1,4 @@
-# KtnEm
+# KtnEm [<img src="https://img.shields.io/github/license/Kirdow/KtnEm?style=flat-square">](https://github.com/Kirdow/KtnEm/blob/master/LICENSE)
 Game made using Emscripten using Software Rendering similar to Wolfenstein 3D using C++17. Project is made alongside me learning how to use Emscripten, and is made open source to document my progress.
 
 # Building
